@@ -1,0 +1,23 @@
+{
+  "name": "alpha",
+  "version": "1.0.0",
+  "description": "Alpha test",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Manuel Pasieka",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^6.0.10"
+  },
+  "devDependencies": {
+     "electron-packager": "^14.0.6",
+     "electron-packager": "^8.1.0"
+    },
+    "scripts": {
+     "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=assets/icons/icns/icon.icns --prune=true --out=release-builds",
+     "package-win": "electron-packager . electron-tutorial-app --overwrite --asar=true --platform=win32 --arch=ia32 --icon=assets/icons/ico/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Alpha Test\"",    
+     "package-linux": "electron-packager . electron-tutorial-app --overwrite --asar=true --platform=linux --arch=x64 --icon=assets/icons/png/icon.png --prune=true --out=release-builds"
+    }
+}
