@@ -4,12 +4,16 @@
     </head>
     <body>
         <h1>Lover List</h1>
+        <ul>
+
+        </ul>
 
 
         <script>
             const electron = require('electron');
             const {ipcRenderer} = electron;
             const ul = document.querySelector('ul');
+
             ipcRenderer.on('item:add', function(e, item){
               ul.className = 'collection';
               const li = document.createElement('li');
@@ -24,13 +28,13 @@
             });
             ul.addEventListener('dblclick', removeItem);
             function removeItem(e){
-              event.target.remove();
+              e.target.remove();
               if(ul.children.length == 0){
                 ul.className = '';
               }
             }
           </script>
 
-          
+
     </body>
 </html>

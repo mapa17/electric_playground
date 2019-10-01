@@ -1,6 +1,12 @@
 const electron = require('electron');
 const url = require('url');
 const path = require('path');
+const axios = require("axios");
+const fs = require('fs');
+const FormData = require('form-data');
+
+// ASIG API Running model inference
+const MODEL_API_URL = "http://localhost:8000/upload";
 
 // Some helper functions
 const isMac = process.platform === 'darwin'
@@ -12,6 +18,11 @@ const {app, BrowserWindow, Menu, ipcMain} = electron;
 let MainWindow;
 let AddItemWindow;
 
+global.sharedObject = {
+    //image_prediction: {'classes': [], 'scores': []}
+    image_prediction: null
+  }
+
 app.on('ready', function(){
     MainWindow = new BrowserWindow({
         webPreferences: {
@@ -20,7 +31,8 @@ app.on('ready', function(){
     });
 
     // Load HTML for mainWindow
-    MainWindow.loadURL(path.join('file://', __dirname, 'windows', 'mainWindow.html'));
+    //MainWindow.loadURL(path.join('file://', __dirname, 'windows', 'mainWindow.html'));
+    MainWindow.loadURL(path.join('file://', __dirname, 'windows', 'DancestyleClassifier.html'));
     MainWindow.on('closed', function(){
         app.quit();
       });
@@ -28,8 +40,38 @@ app.on('ready', function(){
     const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
 
     Menu.setApplicationMenu(mainMenu);
-
 });
+
+
+function runModel(filename){
+
+    var form = new FormData();
+    const stream = fs.createReadStream(filename);
+    form.append('file', stream);
+
+    const formHeaders = form.getHeaders();
+
+    axios.post(MODEL_API_URL, form, {headers: { ...formHeaders,},}).then(function (response) {
+        //handle success
+        //console.log(response);
+        console.log('Send file to classifier!');
+
+        // Make sure that the rendering process can access the results
+        global.sharedObject.image_prediction = {'classes': response.data['classes'], 'scores': response.data['scores']};
+
+        console.log('Classes: ' + response.data['classes'] + '\nPrediction: ' + response.data['scores']);
+    })
+    .catch(function (response) {
+        //handle error
+        console.log(response);
+    });
+}
+  
+ipcMain.on('image_classification', (event, filename) => {
+    //event.sender.send('asynchronous-reply', 'pong')
+    console.log(filename)
+    runModel(filename);
+  })
 
 // Receive event + item from anywhere? and forward it to MainWindow
 ipcMain.on('item:add', function(e, item){
