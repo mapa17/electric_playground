@@ -18,9 +18,11 @@ const {app, BrowserWindow, Menu, ipcMain} = electron;
 let MainWindow;
 let AddItemWindow;
 
+global.newVariable = {valor: 'Vamos a ver si eso funciona'};
+
 global.sharedObject = {
     //image_prediction: {'classes': [], 'scores': []}
-    image_prediction: null
+    imageprediction: '<br>Some initial text here</br>',
   }
 
 app.on('ready', function(){
@@ -32,7 +34,7 @@ app.on('ready', function(){
 
     // Load HTML for mainWindow
     //MainWindow.loadURL(path.join('file://', __dirname, 'windows', 'mainWindow.html'));
-    MainWindow.loadURL(path.join('file://', __dirname, 'windows', 'DancestyleClassifier.html'));
+    updateMain();
     MainWindow.on('closed', function(){
         app.quit();
       });
@@ -42,6 +44,9 @@ app.on('ready', function(){
     Menu.setApplicationMenu(mainMenu);
 });
 
+function updateMain(){
+    MainWindow.loadURL(path.join('file://', __dirname, 'windows', 'DancestyleClassifier.html'));
+}
 
 function runModel(filename){
 
@@ -57,9 +62,11 @@ function runModel(filename){
         console.log('Send file to classifier!');
 
         // Make sure that the rendering process can access the results
-        global.sharedObject.image_prediction = {'classes': response.data['classes'], 'scores': response.data['scores']};
-
+        global.sharedObject.imageprediction = {'classes': response.data['classes'], 'scores': response.data['scores']};
+        
         console.log('Classes: ' + response.data['classes'] + '\nPrediction: ' + response.data['scores']);
+
+        MainWindow.webContents.send('image:classify', response.data);
     })
     .catch(function (response) {
         //handle error
